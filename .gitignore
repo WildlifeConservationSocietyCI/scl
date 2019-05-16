@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+
+src/airflow/airflow-webserver.pid
+src/.python_history
+src/airflow/unittests.cfg
+src/airflow/airflow.db
+src/.bash_history
+.config/
+src/airflow/logs/scheduler/latest
