@@ -1,4 +1,4 @@
-# Template: https://github.com/puckel/docker-airflow/blob/master/docker-compose-LocalExecutor.yml
+# Template: https://github.com/puckel/docker-airflow/blob/master/docker-compose-CeleryExecutor.yml
 
 version: '2.1'
 services:
@@ -10,6 +10,13 @@ services:
         ports:
             - 5432:5432
 
+    redis:
+        container_name: airflow_redis
+        image: redis:latest
+        env_file:
+            - .env
+        # command: redis-server --requirepass redispass
+
     webserver:
         container_name: airflow_service
         build:
@@ -17,17 +24,68 @@ services:
             dockerfile: Dockerfile
         image: scl:latest
         volumes:
-            - $PWD/src:/usr/local/scl
+            - $PWD/src:/var/projects/scl
+            - $PWD/.config:/root/.config
         restart: always
         depends_on:
             - postgres
+            - redis
         env_file:
             - .env
         ports:
-            - "8080:8080"
+            - 8080:8080
         command: webserver
         healthcheck:
-            test: ["CMD-SHELL", "[ -f /usr/local/scl/airflow/airflow-webserver.pid ]"]
+            test: ["CMD-SHELL", "[ -f /var/projects/scl/airflow/airflow-webserver.pid ]"]
             interval: 30s
             timeout: 30s
             retries: 3
+
+    flower:
+        container_name: airflow_flower
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: scl:latest
+        restart: always
+        depends_on:
+            - redis
+        env_file:
+            - .env
+        ports:
+            - 5555:5555
+        command: flower
+
+    scheduler:
+        container_name: airflow_scheduler
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: scl:latest
+        restart: always
+        depends_on:
+            - webserver
+        volumes:
+            - $PWD/src:/var/projects/scl
+            - $PWD/.config:/root/.config
+        env_file:
+            - .env
+        command: scheduler
+
+    worker:
+        container_name: airflow_worker
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: scl:latest
+        restart: always
+        depends_on:
+            - scheduler
+        volumes:
+            - $PWD/src:/var/projects/scl
+            - $PWD/.config:/root/.config
+        env_file:
+            - .env
+        ports:
+            - 8793:8793
+        command: worker
