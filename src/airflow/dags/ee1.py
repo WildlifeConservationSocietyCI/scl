@@ -23,11 +23,13 @@ default_args = {
 
 dag = DAG("ee1", default_args=default_args, schedule_interval=timedelta(1))
 
+
 def print_srtm(ds, **kwargs):
     image = ee.Image('srtm90_v4')
     info = image.getInfo()
     print(info)
     return info
+
 
 get_srtm_info = PythonOperator(
     task_id='print_srtm',

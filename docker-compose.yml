@@ -22,7 +22,7 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        image: scl:latest
+        image: scl_airflow:latest
         volumes:
             - $PWD/src:/var/projects/scl
             - $PWD/.config:/root/.config
@@ -46,7 +46,7 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        image: scl:latest
+        image: scl_flower:latest
         restart: always
         depends_on:
             - redis
@@ -61,7 +61,7 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        image: scl:latest
+        image: scl_scheduler:latest
         restart: always
         depends_on:
             - webserver
@@ -77,7 +77,7 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        image: scl:latest
+        image: scl_worker:latest
         restart: always
         depends_on:
             - scheduler
